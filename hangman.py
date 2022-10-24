@@ -1,7 +1,8 @@
 import random
+import collections
+
 right = 0
 att = 8
-repeat = True
 def game_start():
     print("Welcome to Hangman")
     global words
@@ -28,7 +29,7 @@ def main_function():
     user_guess = input("Guess a letter: ")
     for k in guessed_word_list:
         if (k == user_guess):
-            print("No improvments!")
+            print("You've already guessed this letter!")
             main_function()
             return
     def comparing():
@@ -42,16 +43,18 @@ def main_function():
                 ugadal = True
 
     comparing()
-    print(str(ugadal))
     def word_output():
         global att
-        print(guessed_word_list)
+        print("".join(map(str,guessed_word_list)))
         if ugadal == False:
             att -= 1
             print("That letter doesn't appear in the word")
             print(str(att))
-    word_output()
 
+        if collections.Counter(guessed_word_list) == collections.Counter(main_word):
+            print("You win")
+            raise SystemExit(1)
+    word_output()
 while att > 0:
     main_function()
 
@@ -60,12 +63,4 @@ while att > 0:
 
 
 
-
-#Условия выигрыша
-def win_condition():
-
-    if words[rnd_word] == user_guess:
-        print("You win!")
-    else:
-        print("You lose!")
 
