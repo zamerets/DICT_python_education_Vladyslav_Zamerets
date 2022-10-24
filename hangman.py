@@ -1,4 +1,6 @@
 import random
+right = 0
+att = 8
 def game_start():
     print("Welcome to Hangman")
     global words
@@ -6,8 +8,10 @@ def game_start():
     global rnd_word
     words = 'python', 'java', 'javascript', 'php', 'ruby', 'kotlin'
     rnd_word = random.randint(0, 5)
-
 game_start()
+main_word = list(words[rnd_word])
+
+print(main_word)
 
 def user_word():
     global guessed_word_list
@@ -16,14 +20,44 @@ def user_word():
     i=-1
     for j in guessed_word_list:
         i += 1
-        if(i>=3):
-            guessed_word_list[i]="-"
-
-    user_guess = input("Guess the word " + "".join(map(str,guessed_word_list)) + ": ")
+        guessed_word_list[i]="-"
+    print("".join(map(str,guessed_word_list)))
 user_word()
+def main_function():
+    user_guess = input("Guess a letter: ")
+    def comparing():
+        i=-1
+        global ugadal
+        ugadal = False
+        for k in main_word:
+            i+=1
+            if user_guess == k:
+                guessed_word_list[i] = k
+                ugadal = True
+
+    comparing()
+    print(str(ugadal))
+    def word_output():
+        global att
+        print(guessed_word_list)
+        if ugadal == False:
+            att -= 1
+            print("That letter doesn't appear in the word")
+            print(str(att))
+    word_output()
 
 
+
+
+
+
+
+
+
+#Условия выигрыша
 def win_condition():
+    while att > 0:
+        main_function()
     if words[rnd_word] == user_guess:
         print("You win!")
     else:
