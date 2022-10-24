@@ -1,6 +1,7 @@
 import random
 right = 0
 att = 8
+repeat = True
 def game_start():
     print("Welcome to Hangman")
     global words
@@ -25,6 +26,11 @@ def user_word():
 user_word()
 def main_function():
     user_guess = input("Guess a letter: ")
+    for k in guessed_word_list:
+        if (k == user_guess):
+            print("No improvments!")
+            main_function()
+            return
     def comparing():
         i=-1
         global ugadal
@@ -46,7 +52,8 @@ def main_function():
             print(str(att))
     word_output()
 
-
+while att > 0:
+    main_function()
 
 
 
@@ -56,11 +63,9 @@ def main_function():
 
 #Условия выигрыша
 def win_condition():
-    while att > 0:
-        main_function()
+
     if words[rnd_word] == user_guess:
         print("You win!")
     else:
         print("You lose!")
 
-win_condition()
