@@ -1,2 +1,2 @@
 print("HANGMAN")
-print("The game will be available soon...")
+print("The game will be available soon...22")
