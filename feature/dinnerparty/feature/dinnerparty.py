@@ -1,14 +1,28 @@
 import string
+import random
+
 
 friend_q = None
 friends_list = {}
 total_amount = None
 divided = None
+lucky_one = None
+
+
+def lucky_one_check():
+    global lucky_one
+    global friend_q
+    choice = input("Who is lucky? feature? Write Yes/No: ")
+    if choice == "Yes":
+        lucky_one = random.randint(0, int(friend_q))
+        return lucky_one
+
 
 def check_number(a):
     while int(a) <= 0:
-        a = input("Enter a positive number: ")
-    return a
+        a = input("No one is joined for the party!")
+        raise SystemExit(1)
+
 
 
 def friend_input():
@@ -40,6 +54,19 @@ def dividing():
     for i in friends_list:
         friends_list[i] = divided
 dividing()
+
+
+def luckyone():
+    number = lucky_one_check()
+    k = -1
+    for i in friends_list:
+        k += 1
+        if k == number:
+            friends_list[i] = 0
+            print(i + " is lucky one! :) ")
+luckyone()
+
+
 print(friends_list)
 
 
