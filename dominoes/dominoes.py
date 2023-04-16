@@ -1,10 +1,9 @@
 import random
 
+
 domino = [[i, j] for i in range(7) for j in range(i, 7)]
-
-
 random.shuffle(domino)
-stock_pieces = domino[:14]
+stock = domino[:14]
 bot = domino[14:21]
 player = domino[21:]
 
@@ -17,9 +16,24 @@ else:
     player.remove(snake)
     status = 'bot'
 
-print("="*150)
-print("Stock pieces:", stock_pieces)
-print("Computer pieces:", bot)
-print("Player pieces:", player)
-print("Domino snake:", [snake])
-print("Game status:", status)
+print('=' * 120)
+print("Stock size:", len(stock))
+print("Computer pieces:", len(bot))
+print()
+print(snake)
+print()
+print("Your pieces:")
+for i in range(len(player)):
+    n = i + 1
+    pieces = player[i]
+    print("{}:{}".format(n, pieces))
+
+if status == 'player':
+    print()
+    print("Status: It's your turn to make a move. Enter your command.")
+else:
+    print()
+    print("Status: Computer is about to make a move. Press Enter to continue...")
+
+
+
