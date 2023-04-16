@@ -1,150 +1,115 @@
 import random
-
-full_domino_game = [[i, j] for i in range(7) for j in range(i, 7)]
-snakes = [x for x in full_domino_game if x[0] == x[1]] #сохранил список костей с одинаковыми числами
-stock_pieces = []
-computer_pieces = []
-player_pieces = []
-game_snake = []
-status = ''
-
-
-##отвечает за саму прокрутку игр. цикла
-
-game_cycle = True
-
-
-def check_game_win():
-    global game_cycle
-    if len(computer_pieces) == 0:
-        print("Status: The game is over. The computer won!")
-        game_cycle = False
-    elif len(player_pieces) == 0:
-        print("Status: The game is over. You won!")
-        game_cycle = False
-    elif is_draw(game_snake):
-        print("Status: The game is over. It's a draw!")
-        game_cycle = False
-
-
-def deal_dominoes():
-    current_set_of_dominoes = full_domino_game[:]
-    stock_pieces.clear()
-    computer_pieces.clear()
-    player_pieces.clear()
-    game_snake.clear()    #сброс состояния
-    while current_set_of_dominoes:
-        stock_pieces.append(current_set_of_dominoes.pop((random.randint(0, len(current_set_of_dominoes)-1)))) #поп хватает элемент и удаляет его сразу же из листа
-        computer_pieces.append(current_set_of_dominoes.pop(random.randint(0, len(current_set_of_dominoes)-1)))
-        player_pieces.append(current_set_of_dominoes.pop(random.randint(0, len(current_set_of_dominoes)-1)))
-        stock_pieces.append(current_set_of_dominoes.pop(random.randint(0, len(current_set_of_dominoes)-1)))
-
-
-## нашел самый большой дубль и выложил на поле
-def first_play():
-    global status
-    status = ""
-    for snake_piece in snakes[-1:0:-1]:
-        if snake_piece in computer_pieces:
-            game_snake.append(snake_piece)
-            computer_pieces.remove(snake_piece)
-            status = "player"
-            return
-        elif snake_piece in player_pieces:
-            game_snake.append(snake_piece)
-            player_pieces.remove(snake_piece)
-            status = "computer"
-            return
+#генератор фишек
+def get_domino_pieces(n):
+    domino_pieces = []
+    for _ in range(n):
+        rn = random.randint(0, len(domino_set) - 1)
+        domino_pieces.append(domino_set[rn])
+        del domino_set[rn]
+    return domino_pieces
+# возвращает макс дубль
+def max_double(pieces_list):
+    doubles_list = [piece for piece in pieces_list if piece[0] == piece[1]]
+    if doubles_list:
+        return max(doubles_list)
+    else:
+        return []
+# функция статуса
+def message(st):
+    return {
+        'computer': '\nStatus: Computer is about to make a move. Press Enter to continue...',
+        'player': '\nStatus: It\'s your turn to make a move. Enter your command.',
+        'player_win': '\nStatus: The game is over. You won!',
+        'computer_win': '\nStatus: The game is over. The computer won!',
+        'draw': '\nStatus: The game is over. It\'s a draw!'
+        }[st]
+# поле игры (текущее)
+def current_stage(stat):
+    print('=' * 120)
+    print('Stock size:', len(domino_set))
+    print('Computer pieces:', str(len(computer_pieces)) + '\n')
+    if len(domino_snake) <= 6:
+        print("".join(domino_snake) + '\n')
+    else:
+        print("".join(domino_snake[:3]) + '...' + "".join(domino_snake[-3:]) + '\n')
+    print('Your pieces:')
+    for i in range(len(player_pieces)):
+        print(str(i + 1) + ':' + str(player_pieces[i]))
+    print(message(stat))
+# шагаем (1 раз)
+def make_a_move(m, pieces):
+    if m > 0:
+        domino = pieces[m - 1]
+        right_snake = int(domino_snake[-1][4])
+        if domino.count(right_snake) > 0:
+            if right_snake == domino[1]:
+                domino = [domino[1], domino[0]]
+            domino_snake.append(str(domino))
+            del pieces[m - 1]
         else:
-            continue
-
-
-def is_draw(dominoes):
-    flattened_dominoes = ""
-    for domino in dominoes:
-        flattened_dominoes += f'{domino[0]}{domino[1]}'
-    if flattened_dominoes[0] == flattened_dominoes[-1]:
-        if flattened_dominoes.count(flattened_dominoes[0]) == 8:
-            return True
-
-
-def play_game():
-    global status
-    print_game()
-    check_game_win()
-    if not game_cycle:
-        return
-    if status == 'computer':
-        #случ образом
-        print(f"Status: Computer is about to make a move. Press Enter to continue...")
-        play = random.randint(len(computer_pieces)*-1, len(computer_pieces))
-        play_piece(play, computer_pieces)
-        status = "player"
-        input()
-    else:
+            return 'Illegal'
+    if m < 0:
+        domino = pieces[-m - 1]
+        left_snake = int(domino_snake[0][1])
+        if left_snake in domino:
+            if left_snake == domino[0]:
+                domino = [domino[1], domino[0]]
+            domino_snake.insert(0, str(domino))
+            del pieces[-m - 1]
+        else:
+            return 'Illegal'
+    if m == 0:
+        if domino_set:
+            pieces.extend(get_domino_pieces(1))
+# самая первая фишка
+while True:
+    # полный сет
+    domino_set = [[a, b] for a in range(7) for b in range(7) if a <= b]
+    computer_pieces = get_domino_pieces(7)
+    player_pieces = get_domino_pieces(7)
+    first_domino = max(max_double(computer_pieces), max_double(player_pieces))
+    if first_domino:
+        break
+domino_snake = []
+if first_domino in player_pieces:
+    player_pieces.remove(first_domino)
+    status = 'computer'
+else:
+    computer_pieces.remove(first_domino)
+    status = 'player'
+domino_snake.append(str(first_domino))
+# ходы игры до конца игры
+while True:
+    current_stage(status)
+    if status in ['player_win', 'computer_win', 'draw']:
+        break
+    if status == 'player':
         while True:
-            play = input("Status: It's your turn to make a move. Enter your command: \n")
             try:
-                play = int(play)
-                if len(player_pieces)*-1 > play or len(player_pieces) < play:
-                    raise ValueError
-                else:
-                    break
+                move = int(input())
             except ValueError:
-                print("Invalid input. Please try again.")
+                print('Invalid input. Please try again.')
+                continue
+            if int(move) not in range(-len(player_pieces), len(player_pieces) + 1):
+                print('Invalid input. Please try again.')
+                continue
+            if make_a_move(int(move), player_pieces) == 'Illegal':
+                print('Illegal move. Please try again.')
+                continue
+            break
+        status = 'computer'
+    elif status == 'computer':
+        enter = input()
+        while True:
+            move = random.randint(-len(computer_pieces), len(computer_pieces))
+            if make_a_move(move, computer_pieces) == 'Illegal':
+                continue
+            break
+        status = 'player'
+    if domino_snake[0][1] == domino_snake[-1][4] and "".join(domino_snake).count(domino_snake[0][1]) == 8:
+        status = 'draw'
+    if len(player_pieces) == 0:
+        status = 'player_win'
+    if len(computer_pieces) == 0:
+        status = 'computer_win'
 
-        play_piece(play, player_pieces)
-        status = "computer"
-
-
-def play_piece(play, var):
-    if play > 0:
-        play -= 1
-        game_snake.append(var[play])
-        del var[play]
-    elif play < 0:
-        play = play * -1 - 1
-        game_snake.insert(0, var[play])
-        del var[play]
-    else:
-        var.append(stock_pieces.pop())
-
-
-def print_game():
-    print('=' * 70)
-    print(f"Stock size: {len(stock_pieces)}")
-    print(f"Computer pieces: {len(computer_pieces)}\n")
-    if len(game_snake) > 6:
-        print(f'{game_snake[0]}{game_snake[1]}{game_snake[2]}...{game_snake[-3]}{game_snake[-2]}{game_snake[-1]}\n')
-    else:
-        return_string = ""
-        for domino in game_snake:
-            return_string += f'{domino}'
-        print(f'{return_string}\n')
-    print(f'Player pieces: ')
-    count = 0
-    for domino in player_pieces:
-        count += 1
-        print(f'{count}:{domino}')
-    print()
-
-
-if __name__ == '__main__':
-    deal_dominoes()
-    first_play()
-    while game_cycle:
-        play_game()
-
-'''Умову кінця гри може бути досягнуто двома способами:
-1. В одного з гравців закінчуються кісточки. Перший гравець, який зробив
-це, вважається переможцем.
-2. Цифри на кінцях змії ідентичні та зустрічаються усередині змії 8 разів.
-Наприклад, змія нижче задовольняє цій умові:
-[5,5],[5,2],[2,1],[1,5],[5,4],[4,0],[0,5],[5,3],[3,6],[6,5]
-Однак ці дві змії не задовольняють:
-[5,5],[5,2],[2,1],[1,5],[5,4],[4,0],[0,5]
-[6,5],[5,5],[5,2],[2,1],[1,5],[5,4],[4,0],[0,5],[5,3],[3,1]
-Якщо ця умова виконана, то більше не можна продовжувати гру з цією
-змійкою. Навіть якщо після спустошення резерву в жодного гравця не
-залишиться необхідної кісточки. Так що це нічия.
-Коли гра закінчиться, ваша програма має вивести результат.'''
